@@ -15,7 +15,6 @@ let satelliteStreets = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/sate
 	accessToken: API_KEY
 });
 
-// We create the second tile layer that will be the background of our map.
 let night = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token={accessToken}', {
 	attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery (c) <a href="https://www.mapbox.com/">Mapbox</a>',
 	maxZoom: 18,
@@ -126,15 +125,15 @@ function myStyle(feature) {
   return {
     opacity: 1,
     fillOpacity: 1,
-    fillColor: getColor(feature.properties.mag),
+    fillColor: get1Color(feature.properties.mag),
     color: "#000000",
-    radius: getRadius(feature.properties.mag),
+    radius: get1Radius(feature.properties.mag),
     stroke: true,
     weight: 0.5
   };
 }
 // 5. Change the color function to use three colors for the major earthquakes based on the magnitude of the earthquake.
-function getColor(magnitude) {
+function get1Color(magnitude) {
   if (magnitude > 6) {
     return "#ea2c2c";
   }
@@ -146,7 +145,7 @@ function getColor(magnitude) {
   }
 }
 // 6. Use the function that determines the radius of the earthquake marker based on its magnitude.
-function getRadius(magnitude) {
+function get1Radius(magnitude) {
   if (magnitude === 0) {
     return 1;
   }
@@ -198,18 +197,25 @@ legend.onAdd = function() {
   };
   // Finally, we our legend to the map.
   legend.addTo(map);
-});
 
-  // Use d3.json to make a call to get our Tectonic Plate geoJSON data.
-  //   d3.json(plateData).then(function(data) {
-  //     console.log(data);
-  //     // Creating a GeoJSON layer with the retrieved data.
-  //     L.geoJson(data, {
-  //       style: myStyle,
-  //       onEachFeature: function(feature, layer){
-  //         console.log(layer);
-  //         layer.bindPopup("<h2> Name of Plate: " + feature.properties.Name + "</h2>")  
-  //       }}.addTo(tectonicPlate),
-  //     tectonicPlate.addTo(map));
-  //   });
-  // });
+//Obtain the json data raw
+let plateData = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json"
+let my1Style = {
+  fillColor: "#ffffa1",
+  weight: 3
+}
+  // 3. Use d3.json to make a call to get our Tectonic Plate geoJSON data.
+  d3.json(plateData).then(function(data) {
+    console.log(data);
+    // Creating a GeoJSON layer with the retrieved data.
+    L.geoJson(data, {
+      style: my1Style,
+      onEachFeature: function(feature, layer){
+        console.log(layer);
+        layer.bindPopup("<h2> Name of Plate: " + feature.properties.Name + "</h2>")}
+    }).addTo(tectonicPlate)
+      tectonicPlate.addTo(map);
+    });
+  });
+
+
