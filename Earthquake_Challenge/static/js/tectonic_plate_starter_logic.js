@@ -15,6 +15,12 @@ let satelliteStreets = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/sate
 	accessToken: API_KEY
 });
 
+let night = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+	attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery (c) <a href="https://www.mapbox.com/">Mapbox</a>',
+	maxZoom: 18,
+	accessToken: API_KEY
+});
+
 // Create the map object with center, zoom level and default layer.
 let map = L.map('mapid', {
 	center: [40.7, -94.5],
@@ -25,16 +31,18 @@ let map = L.map('mapid', {
 // Create a base layer that holds all three maps.
 let baseMaps = {
   "Streets": streets,
-  "Satellite": satelliteStreets
+  "Satellite": satelliteStreets,
+  "Nighttime": night
 };
 
 // 1. Add a 2nd layer group for the tectonic plate data.
 let allEarthquakes = new L.LayerGroup();
-
+let tectonicPlate = new L.LayerGroup();
 
 // 2. Add a reference to the tectonic plates group to the overlays object.
 let overlays = {
-  "Earthquakes": allEarthquakes
+  "Earthquakes": allEarthquakes,
+  "Tectonic Plates": tectonicPlate
 };
 
 // Then we add a control to the map that will allow the user to change which
@@ -136,12 +144,27 @@ legend.onAdd = function() {
     return div;
   };
 
-  // Finally, we our legend to the map.
-  legend.addTo(map);
+// Finally, we our legend to the map.
+legend.addTo(map);
 
-
+//Obtain the json data raw
+let plateData = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json"
+let myStyle = {
+  fillColor: "#ffffa1",
+  weight: 3
+}
   // 3. Use d3.json to make a call to get our Tectonic Plate geoJSON data.
-  d3.json().then(() {
-    
+  d3.json(plateData).then(function(data) {
+    console.log(data);
+    // Creating a GeoJSON layer with the retrieved data.
+    L.geoJson(data, {
+      style: myStyle,
+      onEachFeature: function(feature, layer){
+        console.log(layer);
+        layer.bindPopup("<h2> Name of Plate: " + feature.properties.Name + "</h2>")}
+    }).addTo(tectonicPlate)
+      tectonicPlate.addTo(map);
+    });
   });
-});
+
+
